@@ -104,32 +104,32 @@ private extension EmployeeListView {
     }
 }
 
-#Preview("Loading") {
-    EmployeeListView(
-        viewModel: EmployeeListViewModel(previewState: .loading)
-    )
-}
-
-#Preview("Loaded") {
-    EmployeeListView(
-        viewModel: EmployeeListViewModel(previewState: .loaded)
-    )
-}
-
-#Preview("Empty") {
-    EmployeeListView(
-        viewModel: EmployeeListViewModel(previewState: .empty)
-    )
-}
-
-#Preview("Error") {
-    EmployeeListView(
-        viewModel: EmployeeListViewModel(previewState: .error)
-    )
-}
-
-#Preview("Pagination") {
-    EmployeeListView(
-        viewModel: EmployeeListViewModel(previewState: .pagination)
-    )
-}
+//#Preview("Loading") {
+//    EmployeeListView(
+//        viewModel: EmployeeListViewModel(previewState: .loading)
+//    )
+//}
+//
+//#Preview("Loaded") {
+//    EmployeeListView(
+//        viewModel: EmployeeListViewModel(previewState: .loaded)
+//    )
+//}
+//
+//#Preview("Empty") {
+//    EmployeeListView(
+//        viewModel: EmployeeListViewModel(previewState: .empty)
+//    )
+//}
+//
+//#Preview("Error") {
+//    EmployeeListView(
+//        viewModel: EmployeeListViewModel(previewState: .error)
+//    )
+//}
+//
+//#Preview("Pagination") {
+//    EmployeeListView(
+//        viewModel: EmployeeListViewModel(previewState: .pagination)
+//    )
+//}

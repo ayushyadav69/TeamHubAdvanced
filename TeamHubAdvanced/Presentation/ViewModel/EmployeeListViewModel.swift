@@ -13,6 +13,7 @@ final class EmployeeListViewModel {
     // MARK: - Dependencies
     
     private let fetchEmployeesUseCase: FetchEmployeesUseCase
+    private let syncUseCase: SyncEmployeesUseCase
     
     // MARK: - State
     
@@ -25,31 +26,42 @@ final class EmployeeListViewModel {
     
     // MARK: - Init
     
-    init(fetchEmployeesUseCase: FetchEmployeesUseCase) {
+    init(fetchEmployeesUseCase: FetchEmployeesUseCase, syncUseCase: SyncEmployeesUseCase) {
         self.fetchEmployeesUseCase = fetchEmployeesUseCase
+        self.syncUseCase = syncUseCase
         self.state = .loading
     }
     
     func onAppear() {
         guard state.employees.isEmpty else { return }
-        loadFirstPage()
+        
+        Task {
+            await syncUseCase.execute()
+            loadFirstPage()
+        }
     }
     
     func onRefresh() {
-        loadFirstPage()
+        Task {
+            await syncUseCase.execute()   // sync first
+            loadFirstPage()
+        }
     }
     
     private func loadFirstPage() {
         currentPage = 1
         hasMore = true
+        state = .loading
         fetchEmployees(reset: true)
     }
     
     func onItemAppear(_ id: String) {
-        guard let last = state.employees.last else { return }
-        guard last.id == id else { return }
         
-        loadNextPage()
+        guard let last = state.employees.last else { return }
+        
+        if last.id == id {
+            loadNextPage()
+        }
     }
     
     func onEmployeeTap(_ id: String) {
@@ -57,14 +69,23 @@ final class EmployeeListViewModel {
     }
     
     private func loadNextPage() {
-        guard hasMore, !isLoading else { return }
+        
+        guard hasMore else { return }
+        guard !isLoading else { return }
+        
         currentPage += 1
+        
         fetchEmployees(reset: false)
     }
     
     private func fetchEmployees(reset: Bool) {
         
+        guard !isLoading else { return }
         isLoading = true
+        
+        if reset {
+            state = .loading
+        }
         
         Task {
             do {
@@ -143,10 +164,10 @@ final class EmployeeListViewModel {
     }
 }
 
-extension EmployeeListViewModel {
-    
-    convenience init(previewState: EmployeeListViewState) {
-        self.init(fetchEmployeesUseCase: DummyUseCase())
-        self.state = previewState
-    }
-}
+//extension EmployeeListViewModel {
+//    
+//    convenience init(previewState: EmployeeListViewState) {
+//        self.init(fetchEmployeesUseCase: DummyUseCase())
+//        self.state = previewState
+//    }
+//}

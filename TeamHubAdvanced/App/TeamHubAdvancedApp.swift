@@ -6,12 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
-struct TeamHubAdvancedApp: App {
+struct TeamHubApp: App {
+    
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([EmployeeEntity.self])
+        let container = try! ModelContainer(for: schema)
+        return container
+    }()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
         }
+        .modelContainer(sharedModelContainer)
     }
 }
