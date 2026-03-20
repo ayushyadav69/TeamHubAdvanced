@@ -11,6 +11,7 @@ struct EmployeeRowView: View {
     
     let model: EmployeeListItemUIModel
     let onTap: () -> Void
+    let onDelete: () -> Void
     
     var body: some View {
         Button(action: onTap) {
@@ -25,6 +26,13 @@ struct EmployeeRowView: View {
             .padding(.vertical, 8)
         }
         .buttonStyle(.plain)
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
     }
 }
 
@@ -46,7 +54,7 @@ private extension EmployeeRowView {
 #Preview {
     EmployeeRowView(
         model: .mock,
-        onTap: {}
+        onTap: {}, onDelete: {}
     )
     .padding()
 }

@@ -27,13 +27,21 @@ struct RootView: View {
         )
         
         let useCase = FetchEmployeesUseCaseImpl(repository: repository)
+        let addUseCase = AddEmployeeUseCaseImpl(repository: repository)
+        let updateUseCase = UpdateEmployeeUseCaseImpl(repository: repository)
+        let deleteUseCase = DeleteEmployeeUseCaseImpl(repository: repository)
         let syncUseCase = SyncEmployeesUseCaseImpl(repository: repository)
         
         let viewModel = EmployeeListViewModel(
             fetchEmployeesUseCase: useCase,
+            addEmployeeUseCase: addUseCase,
+            updateEmployeeUseCase: updateUseCase,
+            deleteEmployeeUseCase: deleteUseCase,
             syncUseCase: syncUseCase
         )
         
-        EmployeeListView(viewModel: viewModel)
+        NavigationStack {
+            EmployeeListView(viewModel: viewModel)
+        }
     }
 }

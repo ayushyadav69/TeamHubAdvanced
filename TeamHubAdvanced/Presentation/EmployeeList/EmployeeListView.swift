@@ -10,6 +10,7 @@ import SwiftUI
 struct EmployeeListView: View {
     
     @State private var viewModel: EmployeeListViewModel
+    @State private var showAddSheet = false
     
     init(viewModel: EmployeeListViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -28,11 +29,28 @@ struct EmployeeListView: View {
             
             content
         }
+        .navigationTitle("Employees")
         .onAppear {
             viewModel.onAppear()
         }
         .refreshable {
             viewModel.onRefresh()
+        }
+        .toolbar {
+            Button {
+                showAddSheet = true
+            } label: {
+                Image(systemName: "plus")
+            }
+        }
+        .sheet(isPresented: $showAddSheet) {
+            
+            EmployeeFormView(
+                viewModel: EmployeeFormViewModel(),
+                onSave: { newEmployee in
+                    viewModel.onEmployeeAdded(newEmployee)
+                }
+            )
         }
     }
 }
@@ -71,27 +89,37 @@ private extension EmployeeListView {
     }
     
     var listView: some View {
-        ScrollView {
-            LazyVStack {
-                
-                ForEach(viewModel.state.employees) { employee in
+        
+        List {
+            
+            ForEach(viewModel.state.employees) { employee in
+                NavigationLink {
+                    EmployeeDetailView(
+                        viewModel: viewModel.makeDetailViewModel(employee: employee)
+                    )
+                } label: {
                     EmployeeRowView(
                         model: employee,
-                        onTap: {
-                            viewModel.onEmployeeTap(employee.id)
-                        }
+                        onTap: {},
+                        onDelete: {}
                     )
-                    .padding(.horizontal)
-                    .onAppear {
-                        viewModel.onItemAppear(employee.id)
-                    }
                 }
-                
-                if viewModel.state.isLoadingNextPage {
-                    LoadingView()
+                .onAppear {
+                    viewModel.onItemAppear(employee.id)
                 }
             }
+            .onDelete { indexSet in
+                guard let index = indexSet.first else { return }
+                let id = viewModel.state.employees[index].id
+                viewModel.onDeleteEmployee(id)
+            }
+            
+            if viewModel.state.isLoadingNextPage {
+                LoadingView()
+            }
         }
+        .listStyle(.plain)
+        
     }
 }
 
@@ -103,33 +131,3 @@ private extension EmployeeListView {
         !viewModel.state.isEmpty
     }
 }
-
-//#Preview("Loading") {
-//    EmployeeListView(
-//        viewModel: EmployeeListViewModel(previewState: .loading)
-//    )
-//}
-//
-//#Preview("Loaded") {
-//    EmployeeListView(
-//        viewModel: EmployeeListViewModel(previewState: .loaded)
-//    )
-//}
-//
-//#Preview("Empty") {
-//    EmployeeListView(
-//        viewModel: EmployeeListViewModel(previewState: .empty)
-//    )
-//}
-//
-//#Preview("Error") {
-//    EmployeeListView(
-//        viewModel: EmployeeListViewModel(previewState: .error)
-//    )
-//}
-//
-//#Preview("Pagination") {
-//    EmployeeListView(
-//        viewModel: EmployeeListViewModel(previewState: .pagination)
-//    )
-//}

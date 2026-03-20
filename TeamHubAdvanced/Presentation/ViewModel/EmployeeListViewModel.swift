@@ -13,6 +13,9 @@ final class EmployeeListViewModel {
     // MARK: - Dependencies
     
     private let fetchEmployeesUseCase: FetchEmployeesUseCase
+    private let addEmployeeUseCase: AddEmployeeUseCase
+    private let updateEmployeeUseCase: UpdateEmployeeUseCase
+    private let deleteEmployeeUseCase: DeleteEmployeeUseCase
     private let syncUseCase: SyncEmployeesUseCase
     
     // MARK: - State
@@ -26,8 +29,17 @@ final class EmployeeListViewModel {
     
     // MARK: - Init
     
-    init(fetchEmployeesUseCase: FetchEmployeesUseCase, syncUseCase: SyncEmployeesUseCase) {
+    init(
+        fetchEmployeesUseCase: FetchEmployeesUseCase,
+        addEmployeeUseCase: AddEmployeeUseCase,
+        updateEmployeeUseCase: UpdateEmployeeUseCase,
+        deleteEmployeeUseCase: DeleteEmployeeUseCase,
+        syncUseCase: SyncEmployeesUseCase
+    ) {
         self.fetchEmployeesUseCase = fetchEmployeesUseCase
+        self.addEmployeeUseCase = addEmployeeUseCase
+        self.updateEmployeeUseCase = updateEmployeeUseCase
+        self.deleteEmployeeUseCase = deleteEmployeeUseCase
         self.syncUseCase = syncUseCase
         self.state = .loading
     }
@@ -118,6 +130,19 @@ final class EmployeeListViewModel {
         }
     }
     
+    func onDeleteEmployee(_ id: String) {
+        
+        try? deleteEmployeeUseCase.execute(id: id)
+        
+        state = buildLoadedState(
+            items: state.employees.filter { $0.id != id }
+        )
+        
+        Task {
+            await syncUseCase.execute()
+        }
+    }
+    
     private func mapToUI(_ employee: Employee) -> EmployeeListItemUIModel {
         EmployeeListItemUIModel(
             id: employee.id,
@@ -128,6 +153,8 @@ final class EmployeeListViewModel {
             isActive: employee.isActive
         )
     }
+    
+
     
     private func buildLoadedState(items: [EmployeeListItemUIModel]) -> EmployeeListViewState {
         EmployeeListViewState(
@@ -162,12 +189,43 @@ final class EmployeeListViewModel {
             retryButtonTitle: "Retry"
         )
     }
+    
+    func onEmployeeAdded(_ employee: Employee) {
+        
+        try? addEmployeeUseCase.execute(employee)
+        
+        let item = mapToUI(employee)
+        
+        state = buildLoadedState(
+            items: [item] + state.employees
+        )
+        
+        Task {
+            await syncUseCase.execute()
+        }
+    }
+    
+    func makeDetailViewModel(
+        employee: EmployeeListItemUIModel
+    ) -> EmployeeDetailViewModel {
+        
+        let domain = Employee(
+            id: employee.id,
+            name: employee.name,
+            email: "test@email.com",
+            designation: employee.designation,
+            department: employee.department,
+            city: "Noida",
+            country: "India",
+            isActive: employee.isActive,
+            imageURL: employee.imageURL,
+            phoneNumbers: []
+        )
+        
+        return EmployeeDetailViewModel(
+            employee: domain,
+            updateUseCase: updateEmployeeUseCase,
+            syncUseCase: syncUseCase
+        )
+    }
 }
-
-//extension EmployeeListViewModel {
-//    
-//    convenience init(previewState: EmployeeListViewState) {
-//        self.init(fetchEmployeesUseCase: DummyUseCase())
-//        self.state = previewState
-//    }
-//}

@@ -16,4 +16,8 @@ protocol EmployeeRepository {
     ) async throws -> EmployeePage
     
     func sync() async
+    
+    func addEmployee(_ employee: Employee) throws
+    func updateEmployee(_ employee: Employee) throws
+    func deleteEmployee(id: String) throws
 }

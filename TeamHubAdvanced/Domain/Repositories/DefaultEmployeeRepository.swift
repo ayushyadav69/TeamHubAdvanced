@@ -141,4 +141,49 @@ final class DefaultEmployeeRepository: EmployeeRepository {
         
         try local.updateLastSyncDate(Date())
     }
+    
+    func addEmployee(_ employee: Employee) throws {
+        
+        let entity = EmployeeMapper.toEntity(
+            from: employee,
+            createdAt: Date(),
+            updatedAt: Date(),
+            deletedAt: nil
+        )
+        
+        entity.syncState = .pendingCreate
+        
+        try local.upsert([entity])
+    }
+    
+    func updateEmployee(_ employee: Employee) throws {
+        
+        let entities = try local.fetchAllIncludingDeleted()
+        
+        guard let entity = entities.first(where: { $0.id == employee.id }) else { return }
+        
+        entity.name = employee.name
+        entity.designation = employee.designation
+        entity.department = employee.department
+        entity.isActive = employee.isActive
+        entity.updatedAt = Date()
+        
+        if entity.syncState == .synced {
+            entity.syncState = .pendingUpdate
+        }
+        
+        try local.saveContext()
+    }
+    
+    func deleteEmployee(id: String) throws {
+        
+        let entities = try local.fetchAllIncludingDeleted()
+        
+        guard let entity = entities.first(where: { $0.id == id }) else { return }
+        
+        entity.deletedAt = Date()
+        entity.syncState = .pendingDelete
+        
+        try local.saveContext()
+    }
 }

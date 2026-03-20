@@ -19,7 +19,13 @@ final class EmployeeEntity {
     var department: String
     var isActive: Bool
     
+    var email: String
+    var city: String
+    var country: String
+
     var imageURL: String?
+
+    var phoneNumbersData: String 
     
     // Sync fields (optional → backend-safe)
     var createdAt: Date?
@@ -34,7 +40,11 @@ final class EmployeeEntity {
         designation: String,
         department: String,
         isActive: Bool,
+        email: String,
+        city: String,
+        country: String,
         imageURL: String?,
+        phoneNumbersData: String,
         createdAt: Date? = nil,
         updatedAt: Date? = nil,
         deletedAt: Date? = nil,
@@ -45,7 +55,11 @@ final class EmployeeEntity {
         self.designation = designation
         self.department = department
         self.isActive = isActive
+        self.email = email
+        self.city = city
+        self.country = country
         self.imageURL = imageURL
+        self.phoneNumbersData = phoneNumbersData
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt
